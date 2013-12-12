@@ -95,14 +95,19 @@ main(int argc, char **argv)
 	int  opt;
 	char *value;
 	size_t length;
+	int print_num_rows = 0;
 
-	while ((opt=getopt(argc, argv, "HQq:X:d:D:R:I:N:b:"))!=-1) {
+	while ((opt=getopt(argc, argv, "HQCq:X:d:D:R:I:N:b:"))!=-1) {
 		switch (opt) {
 		case 'H':
 			header_row = 0;
 		break;
 		case 'Q':
 			quote_text = 0;
+		break;
+		break;
+		case 'C':
+			print_num_rows = 1;
 		break;
 		case 'q':
 			quote_char = (char *) g_strdup(optarg);
@@ -161,6 +166,7 @@ main(int argc, char **argv)
 		fprintf(stderr,"where options are:\n");
 		fprintf(stderr,"  -H                   supress header row\n");
 		fprintf(stderr,"  -Q                   don't wrap text-like fields in quotes\n");
+		fprintf(stderr,"  -C                   print the number of rows in the table before exporting the table\n");
 		fprintf(stderr,"  -d <delimiter>       specify a column delimiter\n");
 		fprintf(stderr,"  -R <delimiter>       specify a row delimiter\n");
 		fprintf(stderr,"  -I <backend>         INSERT statements (instead of CSV)\n");
@@ -205,6 +211,10 @@ main(int argc, char **argv)
 	/* read table */
 	mdb_read_columns(table);
 	mdb_rewind_table(table);
+	
+	if (print_num_rows) {
+		fprintf(outfile, "%d\n", table->num_rows);
+	}
 	
 	bound_values = (char **) g_malloc(table->num_cols * sizeof(char *));
 	bound_lens = (int *) g_malloc(table->num_cols * sizeof(int));
